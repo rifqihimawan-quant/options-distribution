@@ -497,7 +497,7 @@ def chart_var_tearsheet(paths, S0):
         title=dict(text="VaR & CVaR at multiple confidence levels", font=dict(size=13, color="#8aa0c0"), x=0),
         xaxis_title="Confidence level",
         yaxis_title="Return (%)",
-        barmode="group", bargroup="x",
+        barmode="group",
         height=260,
     )
     return fig
