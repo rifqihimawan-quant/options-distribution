@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 # PAGE CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Hermes Himawan · Price Distribution",
+    page_title="GlassDeck · Price Distribution",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -352,24 +352,53 @@ def chart_distribution(paths, S0, asset, dte):
         x=centers, y=hist, marker_color=colors, marker_line_width=0,
         name="Paths", hovertemplate="$%{x:,.0f}<br>%{y} paths<extra></extra>",
     ))
-    for val, lbl, col in [
-        (np.percentile(paths,5),  "VaR 5%", RED),
-        (np.percentile(paths,25), "P25",    AMBER),
-        (np.median(paths),        "Median", BLUE),
-        (np.mean(paths),          "Mean",   PURPLE),
-        (np.percentile(paths,75), "P75",    GREEN),
-        (np.percentile(paths,95), "P95",    "#059669"),
-    ]:
-        fig.add_vline(x=val, line_dash="dot", line_color=col, line_width=1.5,
-                      annotation_text=lbl, annotation_font_size=9,
-                      annotation_font_color=col, annotation_position="top")
-    fig.add_vline(x=S0, line_dash="solid", line_color="#94a3b8", line_width=2,
-                  annotation_text=f"Spot {asset}",
-                  annotation_font_size=9, annotation_font_color="#64748b")
+
+    # Sort all marker lines by value so we can stagger y-positions
+    # to prevent label collisions between close values (e.g. Mean vs Median)
+    markers = sorted([
+        (np.percentile(paths, 5),  "VaR 5%", RED,      "dash"),
+        (np.percentile(paths, 25), "P25",    AMBER,    "dot"),
+        (np.median(paths),         "Median", BLUE,     "dot"),
+        (np.mean(paths),           "Mean",   PURPLE,   "dash"),
+        (np.percentile(paths, 75), "P75",    GREEN,    "dot"),
+        (np.percentile(paths, 95), "P95",    "#059669","dot"),
+    ], key=lambda x: x[0])
+
+    # Assign staggered yshift levels: cycle through 4 tiers so
+    # adjacent lines never land at the same vertical offset
+    y_tiers = [0, -18, -36, -54]
+    for i, (val, lbl, col, dash) in enumerate(markers):
+        ysh = y_tiers[i % len(y_tiers)]
+        fig.add_vline(
+            x=val, line_dash=dash, line_color=col, line_width=1.5,
+            annotation_text=lbl, annotation_font_size=9,
+            annotation_font_color=col,
+            annotation=dict(
+                yref="paper", y=1, yshift=ysh,
+                xshift=4, showarrow=False,
+                font=dict(size=9, color=col),
+                bgcolor="rgba(255,255,255,0.82)",
+                borderpad=2,
+            ),
+        )
+
+    fig.add_vline(
+        x=S0, line_dash="solid", line_color="#94a3b8", line_width=2,
+        annotation=dict(
+            text=f"Spot {asset}", yref="paper", y=1, yshift=-72,
+            xshift=4, showarrow=False,
+            font=dict(size=9, color="#64748b"),
+            bgcolor="rgba(255,255,255,0.82)", borderpad=2,
+        ),
+    )
+
     fig.update_layout(**CHART_LAYOUT,
-        title=dict(text=f"{asset} simulated price distribution — {dte}d", font=dict(size=13,color="#1e293b",weight=600), x=0),
+        title=dict(text=f"{asset} simulated price distribution — {dte}d",
+                   font=dict(size=13, color="#1e293b"), x=0),
         xaxis_title="Price ($)", yaxis_title="Path count",
-        showlegend=False, height=320, bargap=0.02)
+        showlegend=False, height=360, bargap=0.02,
+        margin=dict(l=52, r=20, t=72, b=40),  # extra top margin for staggered labels
+    )
     return fig
 
 
@@ -403,7 +432,7 @@ def chart_cone(cone, S0, asset):
     fig.update_layout(**CHART_LAYOUT,
         title=dict(text="Volatility cone — expected price range", font=dict(size=13,color="#1e293b"), x=0),
         xaxis_title="Days forward", yaxis_title="Price ($)",
-        yaxis_tickformat="$,.0f", height=300)
+        yaxis_tickformat="$,.0f", height=320)
     return fig
 
 
@@ -436,7 +465,7 @@ def chart_paths(S0, sigma, mu, T_years, n_steps, signal_adj, model,
     fig.update_layout(**CHART_LAYOUT,
         title=dict(text=f"{n_display} simulated paths", font=dict(size=13,color="#1e293b"), x=0),
         xaxis_title="Days forward", yaxis_title="Price ($)",
-        yaxis_tickformat="$,.0f", height=280)
+        yaxis_tickformat="$,.0f", height=360)
     return fig
 
 
@@ -460,7 +489,7 @@ def chart_returns(paths, S0):
                       annotation_text=lbl, annotation_font_size=9, annotation_font_color=col)
     fig.update_layout(**CHART_LAYOUT,
         title=dict(text="Log-return distribution vs normal", font=dict(size=13,color="#1e293b"), x=0),
-        xaxis_title="Log return", yaxis_title="Density", height=265)
+        xaxis_title="Log return", yaxis_title="Density", height=320)
     return fig
 
 
