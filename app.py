@@ -392,12 +392,12 @@ def chart_distribution(paths, S0, asset, dte):
         ),
     )
 
-    fig.update_layout(**CHART_LAYOUT,
+    dist_layout = {**CHART_LAYOUT, "margin": dict(l=52, r=20, t=72, b=40)}
+    fig.update_layout(**dist_layout,
         title=dict(text=f"{asset} simulated price distribution — {dte}d",
                    font=dict(size=13, color="#1e293b"), x=0),
         xaxis_title="Price ($)", yaxis_title="Path count",
         showlegend=False, height=360, bargap=0.02,
-        margin=dict(l=52, r=20, t=72, b=40),  # extra top margin for staggered labels
     )
     return fig
 
