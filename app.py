@@ -661,7 +661,7 @@ def main():
     if not p["run"] and "last_paths" not in st.session_state:
         st.info(
             "Set your parameters in the sidebar and click **▶ Run simulation** to generate the price distribution.",
-            icon="◈",
+            icon="📊",
         )
         st.markdown('<p class="section-head" style="margin-top:1.5rem">Quick reference</p>', unsafe_allow_html=True)
         ref_cols = st.columns(3)
