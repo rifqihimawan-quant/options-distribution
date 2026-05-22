@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 # PAGE CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="GlassDeck · Price Distribution",
+    page_title="Hermes Himawan · Price Distribution",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
